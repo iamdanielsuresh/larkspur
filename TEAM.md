@@ -12,5 +12,12 @@ The review reads these names. Nothing else comes off the list. Your team still
 decides in the moment who does what.
 
 - Daniel Suresh
-- <Name>
-- <Name>
+- Divik Tiwari
+- Siba Kar
+- Prashish Srivastava
+- Rony Ghoshal
+- Vasupalli Dhanesh
+- Shashikant Sahu
+- Sachin Thorat
+  
+  
