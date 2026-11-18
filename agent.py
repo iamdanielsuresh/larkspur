@@ -1,4 +1,4 @@
-"""Larkspur disruption agent. This is the file you build.
+﻿"""Larkspur disruption agent. This is the file you build.
 
 It runs right now, and it is wrong in four places. The trace shows each one
 before the code does, so read the trace first:
@@ -17,6 +17,7 @@ from support import (MODEL, SYSTEM_PROMPT, call_local, execute_tool, mcp_client,
 MAX_TOOL_CALLS = 8  # Larkspur's own build capped the loop here; then a human takes over.
 
 TONE_ADDENDUM = ""                       # ✏️ Build 4, step 4.1, intelligence goal
+
 EXTRA_TOOLS: List[Dict[str, Any]] = []   # ✏️ Build 2, step 2.1: schemas for the tools you add
 LOCAL_TOOLS: Dict[str, Any] = {}         # ✏️ Build 2, step 2.1: the functions behind them
 
@@ -68,22 +69,22 @@ def run_agent(pnr: str, last_name: str, message: str) -> str:            # ✏�
     answer = ""
     turns = 1
     while response.stop_reason == "tool_use" and turns < MAX_TOOL_CALLS:
-        messages.append({"role": "assistant", "content": text_of(response)})
+        messages.append({"role": "assistant", "content": response.content})
         messages.append({"role": "user", "content": tool_results(response)})
-        answer = text_of(response)
         response = client.messages.create(
             model=MODEL, max_tokens=4096, system=runtime_preamble() + SYSTEM_PROMPT + TONE_ADDENDUM,
             thinking={"type": "adaptive"}, tools=tools, messages=messages,
         )
         turns += 1
 
+    answer = text_of(response)
     return answer
 
 
 def tool_list() -> List[Dict[str, Any]]:                   # ✏️ Build 2, step 2.2
     """Given. Exactly what Claude is offered on every turn; run.py --show-tools
     prints this list."""
-    return build_tools() + EXTRA_TOOLS
+    return build_tools() + mcp_client.tools() + EXTRA_TOOLS
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -119,17 +120,25 @@ def build_tools() -> List[Dict[str, Any]]:                 # ✏️ Build 1, ste
                 "type": "object",
                 "properties": {
                     "flight_no": {"type": "string"},
-                    "date": {"type": "string", "description": "MM/DD/YYYY"},
+                    "date": {"type": "string", "description": "Local flight date in ISO format, YYYY-MM-DD (e.g. 2025-05-08). Any other format is rejected."},
                 },
                 "required": ["flight_no", "date"],
             },
         },
         {
             "name": "search_alternatives",
-            "description": "search",
+            "description": (
+                "Find rebooking options for the customer's disrupted segment. Takes only "
+                "the PNR: origin, destination, date and cabin come from the booking, and "
+                "the booked flight is excluded. Returns ranked nonstop alternatives, each "
+                "with an option_id, flight, date, times and seats left, plus any excluded "
+                "flights and why. Use it when the customer needs another flight, before "
+                "offering any option; never invent flights. Pass an option_id from here to "
+                "hold_seat or check_policy."
+            ),
             "input_schema": {
                 "type": "object",
-                "properties": {"pnr": {"type": "string"}},
+                "properties": {"pnr": {"type": "string", "description": "Booking confirmation code, e.g. K7PQ2M."}},
                 "required": ["pnr"],
             },
         },
