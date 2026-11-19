@@ -8,7 +8,7 @@ Number: 16,928 input tokens per resolved contact on ticket K7PQ2M, 5 API turns, 
 Safety check: Hard-gate eval cases block the release on any single failure; the eval run scored 6 of 6 cases and the release was blocked by team-0101.
 Next: Author the tone addendum in our own words so a frustrated customer who mentions a lawyer is handed to a human instead of getting vouchers and rebooking options, then re-run team-0101.
 Still broken: The agent does not escalate a frustrated customer who mentions a legal claim; on team-0101 it issued a meal voucher and searched for flights instead of calling escalate_to_human.
-Lever: intelligence
+Lever: cost
 
 ## Priya asked
 
